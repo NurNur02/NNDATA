@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Календарь сотрудников</title>
+<style>
+    body { font-family: Arial, sans-serif; background: #f4f6f8; margin: 0; padding: 20px; }
+    h1 { text-align: center; }
+    .view-buttons { text-align: center; margin-bottom: 20px; }
+    .view-buttons button {
+        padding: 10px 15px; margin: 0 5px; border: none; border-radius: 5px; cursor: pointer;
+        background-color: #4CAF50; color: white; font-size: 14px;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+    th { background-color: #f0f0f0; }
+    td.record { background-color: #e0f7fa; cursor: pointer; }
+    td.record:hover { background-color: #b2ebf2; }
+    @media (max-width: 600px) {
+        th, td { padding: 5px; font-size: 12px; }
+        .view-buttons button { font-size: 12px; padding: 5px 8px; }
+    }
+</style>
+</head>
+<body>
+
+<h1>Календарь сотрудников</h1>
+
+<div class="view-buttons">
+    <button onclick="setView('day')">День</button>
+    <button onclick="setView('week')">Неделя</button>
+    <button onclick="setView('month')">Месяц</button>
+</div>
+
+<div id="calendar"></div>
+
+<script>
+    // Пример данных сотрудников
+    const records = [
+        { date: '2026-02-19', name: 'Иuudh И.И.', type: 'Работа', description: 'Встреча с клиентом' },
+        { date: '2026-02-20', name: 'ofioi П.П.', type: 'Отпуск', description: 'Отпуск 3 дня' },
+        { date: '2026-02-21', name: 'Сиkd С.С.', type: 'Работа', description: 'Подготовка отчёта' },
+        { date: '2026-02-21', name: 'Оспанова Н.К.', type: 'Работа', description: 'Совещание' },
+    ];
+
+    let currentView = 'month';
+    const calendarDiv = document.getElementById('calendar');
+
+    function setView(view) {
+        currentView = view;
+        renderCalendar();
+    }
+
+    function renderCalendar() {
+        calendarDiv.innerHTML = '';
+        const today = new Date();
+
+        if (currentView === 'day') {
+            const day = today.toISOString().split('T')[0];
+            calendarDiv.innerHTML = `<h2>${day}</h2>` + renderRecordsForDate(day);
+        } else if (currentView === 'week') {
+            const weekStart = new Date(today);
+            weekStart.setDate(today.getDate() - today.getDay());
+            const weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekStart.getDate() + 6);
+
+            let html = `<h2>Неделя: ${weekStart.toISOString().split('T')[0]} - ${weekEnd.toISOString().split('T')[0]}</h2>`;
+            html += '<table><tr>';
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(weekStart);
+                d.setDate(weekStart.getDate() + i);
+                html += `<th>${d.toISOString().split('T')[0]}</th>`;
+            }
+            html += '</tr><tr>';
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(weekStart);
+                d.setDate(weekStart.getDate() + i);
+                html += `<td>${renderRecordsForDate(d.toISOString().split('T')[0], true)}</td>`;
+            }
+            html += '</tr></table>';
+            calendarDiv.innerHTML = html;
+        } else if (currentView === 'month') {
+            const month = today.getMonth();
+            const year = today.getFullYear();
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const daysInMonth = lastDay.getDate();
+
+            let html = `<h2>${year}-${month + 1}</h2>`;
+            html += '<table><tr>';
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dayStr = `${year}-${String(month + 1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+                html += `<th>${i}</th>`;
+            }
+            html += '</tr><tr>';
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dayStr = `${year}-${String(month + 1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+                html += `<td>${renderRecordsForDate(dayStr, true)}</td>`;
+            }
+            html += '</tr></table>';
+            calendarDiv.innerHTML = html;
+        }
+    }
+
+    function renderRecordsForDate(date, short=false) {
+        const recs = records.filter(r => r.date === date);
+        if (recs.length === 0) return '';
+        return recs.map(r => short ? `<div class="record">${r.name} (${r.type})</div>` : `<div class="record"><strong>${r.name}</strong><br>${r.type}<br>${r.description}</div>`).join('');
+    }
+
+    renderCalendar();
+</script>
+
+</body>
+</html>
